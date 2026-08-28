@@ -36,6 +36,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/actuator/health",
+                                "/actuator/health/**",
                                 "/uploads/**",
                                 "/*.html",
                                 "/",
@@ -76,7 +78,11 @@ public class SecurityConfig {
                 // Frontend desplegado
                 "https://trackfile.vercel.app",
                 "https://trackfile.com",
-                "https://trackfile.app"
+                "https://trackfile.app",
+
+                // Servicio de monitoreo
+                "https://uptimerobot.com",
+                "https://www.uptimerobot.com"
         ));
 
         configuration.setAllowedMethods(Arrays.asList(
