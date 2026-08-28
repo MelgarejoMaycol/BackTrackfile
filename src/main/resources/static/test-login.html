@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Test Login - TrackFile</title>
+</head>
+<body>
+  <h2>Login</h2>
+
+  <label>Correo:</label><br/>
+  <input id="correo" type="email" value="transportesoclocksas@gmail.com"><br/><br/>
+
+  <label>Contraseña:</label><br/>
+  <input id="contrasena" type="password"><br/><br/>
+
+  <button onclick="login()">Iniciar sesión</button>
+  <button onclick="probarVehiculos()">Probar /api/vehiculos</button>
+
+  <h3>Salida</h3>
+  <pre id="out"></pre>
+
+  <script>
+    async function login() {
+      const correo = document.getElementById("correo").value;
+      const contrasena = document.getElementById("contrasena").value;
+      const out = document.getElementById("out");
+
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ correo, contrasena })
+        });
+
+        const text = await res.text();
+        out.textContent = text;
+
+        let data = null;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          alert("Respuesta no válida del servidor");
+          return;
+        }
+
+        if (!res.ok) {
+          alert("❌ Error: " + (data.message || "No se pudo iniciar sesión"));
+          return;
+        }
+
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
+
+        alert("✅ Bienvenido: " + (data.nombreEmpresa || data.correo || "Usuario"));
+      } catch (error) {
+        out.textContent = "Error de conexión: " + error.message;
+        alert("❌ Error de conexión con el backend");
+      }
+    }
+
+    async function probarVehiculos() {
+      const out = document.getElementById("out");
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("⚠️ Primero inicia sesión para obtener el token");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/vehiculos", {
+          method: "GET",
+          headers: {
+            "Authorization": "Bearer " + token
+          }
+        });
+
+        const text = await res.text();
+        out.textContent = text;
+
+        if (res.ok) {
+          alert("✅ Endpoint /api/vehiculos funcionando");
+        } else {
+          alert("❌ Error en /api/vehiculos: " + res.status);
+        }
+      } catch (error) {
+        out.textContent = "Error de conexión: " + error.message;
+        alert("❌ No se pudo consultar /api/vehiculos");
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Test Personas y Vehículos - TrackFile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select, button, textarea {
+      margin-top: 5px;
+      padding: 8px;
+      width: 100%;
+      max-width: 520px;
+      box-sizing: border-box;
+    }
+    button {
+      width: auto;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-top: 15px;
+    }
+    pre {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 12px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .row {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .col {
+      flex: 1;
+      min-width: 320px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Test Personas y Vehículos - TrackFile</h2>
+
+  <div class="card">
+    <h3>1. Token JWT</h3>
+
+    <label for="token">Token</label>
+    <textarea id="token" rows="4" placeholder="Pega aquí tu JWT"></textarea>
+
+    <button onclick="usarTokenGuardado()">Usar token guardado</button>
+    <button onclick="guardarToken()">Guardar token</button>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <h3>2. Conductores</h3>
+
+        <button onclick="cargarConductores()">Cargar conductores</button>
+
+        <label for="conductoresSelect">Seleccionar conductor</label>
+        <select id="conductoresSelect" onchange="cargarVehiculosConductor()">
+          <option value="">-- Selecciona un conductor --</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <h3>3. Propietarios</h3>
+
+        <button onclick="cargarPropietarios()">Cargar propietarios</button>
+
+        <label for="propietariosSelect">Seleccionar propietario</label>
+        <select id="propietariosSelect" onchange="cargarVehiculosPropietario()">
+          <option value="">-- Selecciona un propietario --</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>4. Vehículos encontrados</h3>
+
+    <label for="vehiculosSelect">Vehículos</label>
+    <select id="vehiculosSelect">
+      <option value="">-- Aquí aparecerán los vehículos --</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h3>Salida</h3>
+    <pre id="out"></pre>
+  </div>
+
+  <script>
+    function getToken() {
+      return document.getElementById("token").value.trim();
+    }
+
+    function setOutput(data) {
+      const out = document.getElementById("out");
+      out.textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+    }
+
+    function usarTokenGuardado() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No hay token guardado");
+        return;
+      }
+      document.getElementById("token").value = token;
+      alert("✅ Token cargado");
+    }
+
+    function guardarToken() {
+      const token = getToken();
+      if (!token) {
+        alert("Pega primero un token");
+        return;
+      }
+      localStorage.setItem("token", token);
+      alert("✅ Token guardado");
+    }
+
+    function limpiarVehiculos() {
+      const select = document.getElementById("vehiculosSelect");
+      select.innerHTML = `<option value="">-- Aquí aparecerán los vehículos --</option>`;
+    }
+
+    async function fetchConToken(url) {
+      const token = getToken();
+      if (!token) {
+        alert("Falta token");
+        return null;
+      }
+
+      const res = await fetch(url, {
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+
+      const text = await res.text();
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(text || "Respuesta no válida");
+      }
+
+      if (!res.ok) {
+        throw new Error(data.message || ("Error " + res.status));
+      }
+
+      return data;
+    }
+
+    async function cargarConductores() {
+      try {
+        const data = await fetchConToken("/api/conductores");
+        if (!data) return;
+
+        const select = document.getElementById("conductoresSelect");
+        select.innerHTML = `<option value="">-- Selecciona un conductor --</option>`;
+
+        data.forEach(item => {
+          const opt = document.createElement("option");
+          opt.value = item.id;
+          opt.textContent = `${item.nombreCompleto} ${item.extra ? "- " + item.extra : ""}`;
+          select.appendChild(opt);
+        });
+
+        limpiarVehiculos();
+        setOutput(data);
+        alert("✅ Conductores cargados");
+      } catch (e) {
+        setOutput("Error: " + e.message);
+        alert("❌ " + e.message);
+      }
+    }
+
+    async function cargarPropietarios() {
+      try {
+        const data = await fetchConToken("/api/propietarios");
+        if (!data) return;
+
+        const select = document.getElementById("propietariosSelect");
+        select.innerHTML = `<option value="">-- Selecciona un propietario --</option>`;
+
+        data.forEach(item => {
+          const opt = document.createElement("option");
+          opt.value = item.id;
+          opt.textContent = `${item.nombreCompleto} ${item.extra ? "- " + item.extra : ""}`;
+          select.appendChild(opt);
+        });
+
+        limpiarVehiculos();
+        setOutput(data);
+        alert("✅ Propietarios cargados");
+      } catch (e) {
+        setOutput("Error: " + e.message);
+        alert("❌ " + e.message);
+      }
+    }
+
+    async function cargarVehiculosConductor() {
+      const conductorId = document.getElementById("conductoresSelect").value;
+      if (!conductorId) {
+        limpiarVehiculos();
+        return;
+      }
+
+      document.getElementById("propietariosSelect").value = "";
+
+      try {
+        const data = await fetchConToken(`/api/vehiculos/conductor/${conductorId}`);
+        if (!data) return;
+
+        pintarVehiculos(data);
+        setOutput(data);
+      } catch (e) {
+        setOutput("Error: " + e.message);
+        alert("❌ " + e.message);
+      }
+    }
+
+    async function cargarVehiculosPropietario() {
+      const propietarioId = document.getElementById("propietariosSelect").value;
+      if (!propietarioId) {
+        limpiarVehiculos();
+        return;
+      }
+
+      document.getElementById("conductoresSelect").value = "";
+
+      try {
+        const data = await fetchConToken(`/api/vehiculos/propietario/${propietarioId}`);
+        if (!data) return;
+
+        pintarVehiculos(data);
+        setOutput(data);
+      } catch (e) {
+        setOutput("Error: " + e.message);
+        alert("❌ " + e.message);
+      }
+    }
+
+    function pintarVehiculos(lista) {
+      const select = document.getElementById("vehiculosSelect");
+      select.innerHTML = `<option value="">-- Selecciona un vehículo --</option>`;
+
+      lista.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v.id;
+        opt.textContent = `${v.placa} - ${v.marca || ""} ${v.modelo || ""} ${v.color ? "- " + v.color : ""}`.trim();
+        select.appendChild(opt);
+      });
+
+      if (lista.length === 0) {
+        select.innerHTML = `<option value="">-- No hay vehículos asociados --</option>`;
+      }
+    }
+  </script>
+</body>
+</html>

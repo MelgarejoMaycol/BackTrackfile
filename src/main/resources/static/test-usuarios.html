@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Test Usuarios - TrackFile</title>
+
+<style>
+body{
+  font-family: Arial;
+  max-width: 900px;
+  margin: 40px auto;
+}
+
+.card{
+  border:1px solid #ccc;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+
+button{
+  padding:8px 12px;
+  cursor:pointer;
+}
+
+pre{
+  background:#f5f5f5;
+  padding:10px;
+  overflow:auto;
+}
+</style>
+
+</head>
+<body>
+
+<h2>🔍 Test Front - Usuarios Empresa</h2>
+
+<div class="card">
+  <h3>Token</h3>
+  <textarea id="token" rows="4" style="width:100%"></textarea>
+  <br><br>
+  <button onclick="usarToken()">Usar token guardado</button>
+  <button onclick="guardarToken()">Guardar token</button>
+</div>
+
+<div class="card">
+  <h3>Pruebas</h3>
+
+  <button onclick="listarConductores()">👨‍✈️ Conductores</button>
+  <button onclick="listarPropietarios()">👨‍💼 Propietarios</button>
+  <button onclick="listarUsuarios()">👤 Usuarios</button>
+</div>
+
+<div class="card">
+  <h3>Salida</h3>
+  <pre id="out"></pre>
+</div>
+
+<script>
+
+function getToken(){
+  return document.getElementById("token").value.trim();
+}
+
+function setOutput(data){
+  document.getElementById("out").textContent =
+    typeof data === "string" ? data : JSON.stringify(data, null, 2);
+}
+
+function usarToken(){
+  const t = localStorage.getItem("token");
+  if(!t){
+    alert("No hay token");
+    return;
+  }
+  document.getElementById("token").value = t;
+}
+
+function guardarToken(){
+  localStorage.setItem("token", getToken());
+  alert("Guardado");
+}
+
+async function fetchApi(url){
+  const token = getToken();
+
+  const res = await fetch(url,{
+    headers:{
+      "Authorization": "Bearer " + token
+    }
+  });
+
+  const text = await res.text();
+
+  try{
+    const data = JSON.parse(text);
+    setOutput(data);
+  }catch{
+    setOutput(text);
+  }
+
+  console.log("STATUS:", res.status);
+}
+
+async function listarConductores(){
+  await fetchApi("http://localhost:8080/api/conductores");
+}
+
+async function listarPropietarios(){
+  await fetchApi("http://localhost:8080/api/propietarios");
+}
+
+async function listarUsuarios(){
+  await fetchApi("http://localhost:8080/api/usuarios");
+}
+
+</script>
+
+</body>
+</html>

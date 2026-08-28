@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Test Fase 3 - TrackFile</title>
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    h2, h3{
+      margin-top: 30px;
+    }
+    .card{
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    label{
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, textarea, button, select{
+      margin-top: 5px;
+      padding: 8px;
+      width: 100%;
+      max-width: 520px;
+      box-sizing: border-box;
+    }
+    button{
+      width: auto;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-top: 15px;
+    }
+    pre{
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 12px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .row{
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .col{
+      flex: 1;
+      min-width: 320px;
+    }
+    .small{
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Test Fase 3 - TrackFile</h2>
+  <p class="small">
+    Incluye pruebas para vehículos, tipos de documento, documentos, filtros y subida para persona o vehículo.
+  </p>
+
+  <div class="card">
+    <h3>1. Token JWT</h3>
+
+    <label for="token">Token</label>
+    <textarea id="token" rows="5" placeholder="Pega aquí tu JWT"></textarea>
+
+    <button onclick="usarTokenGuardado()">Usar token guardado</button>
+    <button onclick="guardarToken()">Guardar token</button>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <h3>2. Vehículos</h3>
+
+        <label for="vehiculoListar">Vehículo</label>
+        <select id="vehiculoListar">
+          <option value="">-- Selecciona un vehículo --</option>
+        </select>
+
+        <button onclick="cargarVehiculos()">Cargar vehículos</button>
+        <button onclick="obtenerVehiculo()">Obtener vehículo</button>
+        <button onclick="obtenerVehiculoDetalle()">Detalle vehículo</button>
+        <button onclick="listarDocumentosPorVehiculo()">Documentos del vehículo</button>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <h3>3. Documento por ID</h3>
+
+        <label for="documentoIdGet">ID Documento</label>
+        <input id="documentoIdGet" type="number" value="1">
+
+        <button onclick="obtenerDocumento()">Obtener documento</button>
+        <button onclick="obtenerDocumentoDetalle()">Detalle documento</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>4. Tipos de documento</h3>
+
+    <div class="row">
+      <div class="col">
+        <label for="tipoIdGet">ID Tipo</label>
+        <input id="tipoIdGet" type="number" value="1">
+
+        <button onclick="listarTiposDocumento()">Listar tipos</button>
+        <button onclick="obtenerTipoDocumento()">Obtener tipo</button>
+      </div>
+
+      <div class="col">
+        <label for="tipoNombre">Nombre</label>
+        <input id="tipoNombre" type="text" placeholder="Ej: SOAT">
+
+        <label for="tipoDescripcion">Descripción</label>
+        <input id="tipoDescripcion" type="text" placeholder="Ej: Seguro obligatorio">
+
+        <button onclick="crearTipoDocumento()">Crear tipo</button>
+        <button onclick="actualizarTipoDocumento()">Actualizar tipo</button>
+        <button onclick="eliminarTipoDocumento()">Eliminar tipo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>5. Tabla de documentos y filtros</h3>
+
+    <label for="estadoFiltro">Estado</label>
+    <select id="estadoFiltro">
+      <option value="">-- Todos --</option>
+      <option value="vigente">Vigente</option>
+      <option value="vencido">Vencido</option>
+    </select>
+
+    <label for="diasMaximosFiltro">Días máximos (opcional)</label>
+    <input id="diasMaximosFiltro" type="number" placeholder="Ej: 30">
+
+    <button onclick="listarTablaDocumentos()">Ver tabla documentos</button>
+  </div>
+
+  <div class="card">
+    <h3>6. Subir documento</h3>
+
+    <div class="row">
+      <div class="col">
+        <label for="modoAsociacion">Asociar documento a</label>
+        <select id="modoAsociacion" onchange="cambiarModoAsociacion()">
+          <option value="vehiculo">Vehículo</option>
+          <option value="persona">Persona</option>
+        </select>
+
+        <div id="bloqueVehiculo">
+          <label for="idVehiculo">Vehículo</label>
+          <select id="idVehiculo">
+            <option value="">-- Selecciona un vehículo --</option>
+          </select>
+        </div>
+
+        <div id="bloqueUsuario" style="display:none;">
+          <label for="idUsuario">Usuario ID</label>
+          <input id="idUsuario" type="number" placeholder="Ej: 5">
+        </div>
+      </div>
+
+      <div class="col">
+        <label for="idTipo">Tipo de documento</label>
+        <select id="idTipo">
+          <option value="">-- Selecciona un tipo --</option>
+        </select>
+
+        <label for="area">Área</label>
+        <input id="area" type="text" value="Operaciones">
+
+        <label for="responsableUsuarioId">Responsable Usuario ID (opcional)</label>
+        <input id="responsableUsuarioId" type="number" placeholder="Ej: 2">
+      </div>
+    </div>
+
+    <label for="fechaVencimiento">Fecha vencimiento</label>
+    <input id="fechaVencimiento" type="date">
+
+    <label for="observaciones">Observaciones</label>
+    <textarea id="observaciones" rows="3" placeholder="Ej: SOAT del vehículo"></textarea>
+
+    <label for="archivo">Archivo</label>
+    <input id="archivo" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp">
+
+    <button onclick="subirDocumento()">Subir documento</button>
+  </div>
+
+  <div class="card">
+    <h3>7. Actualizar documento</h3>
+
+    <label for="documentoIdUpdate">ID Documento</label>
+    <input id="documentoIdUpdate" type="number" value="1">
+
+    <div class="row">
+      <div class="col">
+        <label for="updateIdVehiculo">Nuevo idVehiculo (opcional)</label>
+        <input id="updateIdVehiculo" type="number" placeholder="Ej: 2">
+
+        <label for="updateIdUsuario">Nuevo idUsuario (opcional)</label>
+        <input id="updateIdUsuario" type="number" placeholder="Ej: 5">
+
+        <label for="updateIdTipo">Nuevo idTipo</label>
+        <input id="updateIdTipo" type="number" placeholder="Ej: 1">
+      </div>
+
+      <div class="col">
+        <label for="updateArea">Área</label>
+        <input id="updateArea" type="text" value="Operaciones">
+
+        <label for="updateResponsableUsuarioId">Responsable Usuario ID</label>
+        <input id="updateResponsableUsuarioId" type="number" placeholder="Ej: 2">
+
+        <label for="updateFechaVencimiento">Fecha vencimiento</label>
+        <input id="updateFechaVencimiento" type="date">
+      </div>
+    </div>
+
+    <label for="updateObservaciones">Observaciones</label>
+    <textarea id="updateObservaciones" rows="3"></textarea>
+
+    <button onclick="actualizarDocumento()">Actualizar documento</button>
+  </div>
+
+  <div class="card">
+    <h3>8. Eliminar documento</h3>
+
+    <label for="documentoIdDelete">ID Documento</label>
+    <input id="documentoIdDelete" type="number" value="1">
+
+    <button onclick="eliminarDocumento()">Eliminar documento</button>
+  </div>
+
+  <div class="card">
+    <h3>Salida</h3>
+    <pre id="out"></pre>
+  </div>
+
+  <script>
+    function getToken() {
+      return document.getElementById("token").value.trim();
+    }
+
+    function setOutput(data) {
+      const out = document.getElementById("out");
+      if (typeof data === "string") {
+        out.textContent = data;
+      } else {
+        out.textContent = JSON.stringify(data, null, 2);
+      }
+    }
+
+    function usarTokenGuardado() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No hay token guardado en localStorage");
+        return;
+      }
+      document.getElementById("token").value = token;
+      alert("✅ Token cargado desde localStorage");
+    }
+
+    function guardarToken() {
+      const token = getToken();
+      if (!token) {
+        alert("Pega primero un token");
+        return;
+      }
+      localStorage.setItem("token", token);
+      alert("✅ Token guardado");
+    }
+
+    function limpiarSelect(selectId, placeholder) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = `<option value="">${placeholder}</option>`;
+    }
+
+    function poblarVehiculos(lista, selectId) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = `<option value="">-- Selecciona un vehículo --</option>`;
+
+      if (!Array.isArray(lista) || lista.length === 0) {
+        select.innerHTML = `<option value="">-- No hay vehículos --</option>`;
+        return;
+      }
+
+      lista.forEach(v => {
+        const id = v.id ?? v.idVehiculo ?? v.id_vehiculo;
+        const placa = v.placa ?? "";
+        const marca = v.marca ?? "";
+        const modelo = v.modelo ?? "";
+
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = `${placa} - ${marca} ${modelo}`.trim();
+        select.appendChild(opt);
+      });
+    }
+
+    function poblarTipos(lista) {
+      const select = document.getElementById("idTipo");
+      select.innerHTML = `<option value="">-- Selecciona un tipo --</option>`;
+
+      if (!Array.isArray(lista) || lista.length === 0) {
+        select.innerHTML = `<option value="">-- No hay tipos --</option>`;
+        return;
+      }
+
+      lista.forEach(t => {
+        const id = t.idTipo ?? t.id_tipo ?? t.id;
+        const nombre = t.nombre ?? "";
+        const descripcion = t.descripcion ?? "";
+
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = descripcion ? `${nombre} - ${descripcion}` : nombre;
+        select.appendChild(opt);
+      });
+    }
+
+    function cambiarModoAsociacion() {
+      const modo = document.getElementById("modoAsociacion").value;
+      document.getElementById("bloqueVehiculo").style.display = modo === "vehiculo" ? "block" : "none";
+      document.getElementById("bloqueUsuario").style.display = modo === "persona" ? "block" : "none";
+    }
+
+    async function fetchJson(url, options = {}) {
+      const token = getToken();
+
+      if (!token) {
+        alert("Falta token");
+        return null;
+      }
+
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          "Authorization": "Bearer " + token
+        }
+      });
+
+      const text = await res.text();
+
+      try {
+        const data = text ? JSON.parse(text) : "";
+        return { res, data };
+      } catch {
+        return { res, data: text };
+      }
+    }
+
+    async function cargarVehiculos() {
+      const result = await fetchJson("/api/vehiculos", { method: "GET" });
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+
+      if (!res.ok) {
+        alert("❌ Error " + res.status);
+        return;
+      }
+
+      poblarVehiculos(data, "vehiculoListar");
+      poblarVehiculos(data, "idVehiculo");
+      alert("✅ Vehículos cargados");
+    }
+
+    async function obtenerVehiculo() {
+      const id = document.getElementById("vehiculoListar").value;
+      if (!id) return alert("Selecciona un vehículo");
+
+      const result = await fetchJson(`/api/vehiculos/${id}`, { method: "GET" });
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+      alert(res.ok ? "✅ Vehículo obtenido" : "❌ Error " + res.status);
+    }
+
+    async function obtenerVehiculoDetalle() {
+      const id = document.getElementById("vehiculoListar").value;
+      if (!id) return alert("Selecciona un vehículo");
+
+      const result = await fetchJson(`/api/vehiculos/${id}/detalle`, { method: "GET" });
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+      alert(res.ok ? "✅ Detalle de vehículo obtenido" : "❌ Error " + res.status);
+    }
+
+    async function listarDocumentosPorVehiculo() {
+      const id = document.getElementById("vehiculoListar").value;
+      if (!id) return alert("Selecciona un vehículo");
+
+      const result = await fetchJson(`/api/vehiculos/${id}/documentos`, { method: "GET" });
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+      alert(res.ok ? "✅ Documentos del vehículo listados" : "❌ Error " + res.status);
+    }
+
+    async function obtenerDocumento() {
+      const id = document.getElementById("documentoIdGet").value;
+      if (!id) return alert("Ingresa el ID del documento");
+
+      const result = await fetchJson(`/api/documentos/${id}`, { method: "GET" });
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+
+      if (res.ok && data && data.urlStorage) {
+        const abrir = confirm("¿Deseas abrir el archivo?");
+        if (abrir) {
+          window.open(data.urlStorage, "_blank");
+        }
+      }
+
+      alert(res.ok ? "✅ Documento obtenido" : "❌ Error " + res.status);
+    }
+
+    async function obtenerDocumentoDetalle() {
+      const id = document.getElementById("documentoIdGet").value;
+      if (!id) return alert("Ingresa el ID del documento");
+
+      const result = await fetchJson(`/api/documentos/${id}/detalle`, { method: "GET" });
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+      alert(res.ok ? "✅ Detalle de documento obtenido" : "❌ Error " + res.status);
+    }
+
+    async function listarTiposDocumento() {
+      const result = await fetchJson(`/api/tipos-documento`, { method: "GET" });
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+
+      if (res.ok) {
+        poblarTipos(data);
+      }
+
+      alert(res.ok ? "✅ Tipos de documento cargados" : "❌ Error " + res.status);
+    }
+
+    async function obtenerTipoDocumento() {
+      const id = document.getElementById("tipoIdGet").value;
+      if (!id) return alert("Ingresa el ID del tipo");
+
+      const result = await fetchJson(`/api/tipos-documento/${id}`, { method: "GET" });
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+      alert(res.ok ? "✅ Tipo obtenido" : "❌ Error " + res.status);
+    }
+
+    async function crearTipoDocumento() {
+      const nombre = document.getElementById("tipoNombre").value.trim();
+      const descripcion = document.getElementById("tipoDescripcion").value.trim();
+
+      if (!nombre) return alert("Ingresa el nombre del tipo");
+
+      const result = await fetchJson(`/api/tipos-documento`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ nombre, descripcion })
+      });
+
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+
+      if (res.ok) {
+        await listarTiposDocumento();
+      }
+
+      alert(res.ok ? "✅ Tipo creado" : "❌ Error " + res.status);
+    }
+
+    async function actualizarTipoDocumento() {
+      const id = document.getElementById("tipoIdGet").value;
+      const nombre = document.getElementById("tipoNombre").value.trim();
+      const descripcion = document.getElementById("tipoDescripcion").value.trim();
+
+      if (!id) return alert("Ingresa el ID del tipo");
+      if (!nombre) return alert("Ingresa el nombre del tipo");
+
+      const result = await fetchJson(`/api/tipos-documento/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ nombre, descripcion })
+      });
+
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+
+      if (res.ok) {
+        await listarTiposDocumento();
+      }
+
+      alert(res.ok ? "✅ Tipo actualizado" : "❌ Error " + res.status);
+    }
+
+    async function eliminarTipoDocumento() {
+      const id = document.getElementById("tipoIdGet").value;
+      if (!id) return alert("Ingresa el ID del tipo");
+
+      const ok = confirm("¿Seguro que quieres eliminar el tipo " + id + "?");
+      if (!ok) return;
+
+      const result = await fetchJson(`/api/tipos-documento/${id}`, {
+        method: "DELETE"
+      });
+
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(res.ok ? "Tipo eliminado correctamente" : data);
+
+      if (res.ok) {
+        await listarTiposDocumento();
+      }
+
+      alert(res.ok ? "✅ Tipo eliminado" : "❌ Error " + res.status);
+    }
+
+    async function listarTablaDocumentos() {
+      const estado = document.getElementById("estadoFiltro").value.trim();
+      const diasMaximos = document.getElementById("diasMaximosFiltro").value.trim();
+
+      const params = new URLSearchParams();
+      if (estado) params.append("estado", estado);
+      if (diasMaximos) params.append("diasMaximos", diasMaximos);
+
+      const url = params.toString()
+        ? `/api/documentos/tabla?${params.toString()}`
+        : `/api/documentos/tabla`;
+
+      const result = await fetchJson(url, { method: "GET" });
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+      alert(res.ok ? "✅ Tabla de documentos obtenida" : "❌ Error " + res.status);
+    }
+
+    async function subirDocumento() {
+      const token = getToken();
+      if (!token) return alert("Falta token");
+
+      const archivoInput = document.getElementById("archivo");
+      if (!archivoInput.files || archivoInput.files.length === 0) {
+        return alert("Selecciona un archivo");
+      }
+
+      const modo = document.getElementById("modoAsociacion").value;
+      const idTipo = document.getElementById("idTipo").value;
+
+      if (!idTipo) return alert("Selecciona un tipo de documento");
+
+      const formData = new FormData();
+
+      if (modo === "vehiculo") {
+        const idVehiculo = document.getElementById("idVehiculo").value;
+        if (!idVehiculo) return alert("Selecciona un vehículo");
+        formData.append("idVehiculo", idVehiculo);
+      } else {
+        const idUsuario = document.getElementById("idUsuario").value.trim();
+        if (!idUsuario) return alert("Ingresa el idUsuario");
+        formData.append("idUsuario", idUsuario);
+      }
+
+      formData.append("idTipo", idTipo);
+      formData.append("area", document.getElementById("area").value);
+      formData.append("observaciones", document.getElementById("observaciones").value);
+      formData.append("archivo", archivoInput.files[0]);
+
+      const fechaVencimiento = document.getElementById("fechaVencimiento").value;
+      if (fechaVencimiento) {
+        formData.append("fechaVencimiento", fechaVencimiento);
+      }
+
+      const responsableUsuarioId = document.getElementById("responsableUsuarioId").value.trim();
+      if (responsableUsuarioId) {
+        formData.append("responsableUsuarioId", responsableUsuarioId);
+      }
+
+      const result = await fetch("/api/documentos", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token
+        },
+        body: formData
+      });
+
+      const text = await result.text();
+
+      try {
+        const data = text ? JSON.parse(text) : "";
+        setOutput(data);
+
+        if (result.ok) {
+          alert("✅ Documento subido correctamente");
+          await listarTablaDocumentos();
+        } else {
+          alert("❌ Error " + result.status);
+        }
+      } catch {
+        setOutput(text);
+        alert("❌ Respuesta no JSON");
+      }
+    }
+
+    async function actualizarDocumento() {
+      const id = document.getElementById("documentoIdUpdate").value;
+      if (!id) return alert("Ingresa el ID del documento");
+
+      const payload = {
+        idVehiculo: document.getElementById("updateIdVehiculo").value || null,
+        idUsuario: document.getElementById("updateIdUsuario").value || null,
+        idTipo: document.getElementById("updateIdTipo").value || null,
+        area: document.getElementById("updateArea").value || null,
+        responsableUsuarioId: document.getElementById("updateResponsableUsuarioId").value || null,
+        fechaVencimiento: document.getElementById("updateFechaVencimiento").value || null,
+        observaciones: document.getElementById("updateObservaciones").value || null
+      };
+
+      if (!payload.idTipo) {
+        return alert("Ingresa el idTipo");
+      }
+
+      if (payload.idVehiculo) payload.idVehiculo = Number(payload.idVehiculo);
+      if (payload.idUsuario) payload.idUsuario = Number(payload.idUsuario);
+      payload.idTipo = Number(payload.idTipo);
+      if (payload.responsableUsuarioId) payload.responsableUsuarioId = Number(payload.responsableUsuarioId);
+
+      const result = await fetchJson(`/api/documentos/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(data);
+
+      if (res.ok) {
+        await listarTablaDocumentos();
+      }
+
+      alert(res.ok ? "✅ Documento actualizado" : "❌ Error " + res.status);
+    }
+
+    async function eliminarDocumento() {
+      const id = document.getElementById("documentoIdDelete").value;
+      if (!id) return alert("Ingresa el ID del documento");
+
+      const ok = confirm("¿Seguro que quieres eliminar el documento " + id + "?");
+      if (!ok) return;
+
+      const result = await fetchJson(`/api/documentos/${id}`, {
+        method: "DELETE"
+      });
+
+      if (!result) return;
+
+      const { res, data } = result;
+      setOutput(res.ok ? "Documento eliminado correctamente" : data);
+
+      if (res.ok) {
+        await listarTablaDocumentos();
+      }
+
+      alert(res.ok ? "✅ Documento eliminado" : "❌ Error " + res.status);
+    }
+
+    window.addEventListener("load", async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        document.getElementById("token").value = token;
+      }
+      cambiarModoAsociacion();
+    });
+  </script>
+</body>
+</html>

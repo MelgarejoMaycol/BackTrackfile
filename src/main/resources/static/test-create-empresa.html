@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Registro Empresa - TrackFile</title>
+</head>
+<body>
+  <h2>Registro Empresa (Fase 1)</h2>
+
+  <form id="formRegistro" enctype="multipart/form-data">
+    <label>Nombre empresa:</label><br>
+    <input type="text" name="nombreEmpresa" required><br><br>
+
+    <label>NIT:</label><br>
+    <input type="text" name="nit" required><br><br>
+
+    <label>Correo:</label><br>
+    <input type="email" name="correo" required><br><br>
+
+    <label>Teléfono:</label><br>
+    <input type="text" name="telefono"><br><br>
+
+    <label>Dirección:</label><br>
+    <input type="text" name="direccion"><br><br>
+
+    <label>Representante legal:</label><br>
+    <input type="text" name="representanteLegal"><br><br>
+
+    <label>Cédula representante:</label><br>
+    <input type="text" name="cedulaRepresentante"><br><br>
+
+    <label>Contraseña:</label><br>
+    <input type="password" name="contrasena" required autocomplete="new-password"><br><br>
+
+    <label>RUT (PDF):</label><br>
+    <input type="file" name="rutPdf" accept=".pdf" required><br><br>
+
+    <button type="submit">Registrar</button>
+  </form>
+
+  <h3>Salida</h3>
+  <pre id="out"></pre>
+
+  <script>
+    document.getElementById("formRegistro").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const out = document.getElementById("out");
+      out.textContent = "Enviando...";
+
+      const formData = new FormData(this);
+
+      try {
+        const res = await fetch("/api/auth/registro-empresa", {
+          method: "POST",
+          body: formData
+        });
+
+        const text = await res.text();
+        out.textContent = text;
+
+        if (res.ok) {
+          alert("✅ Empresa registrada correctamente");
+        } else {
+          alert("❌ Error: " + text);
+        }
+      } catch (error) {
+        out.textContent = "Error de conexión: " + error.message;
+        alert("❌ Error de conexión con el backend");
+      }
+    });
+  </script>
+</body>
+</html>
