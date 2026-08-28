@@ -76,6 +76,10 @@ $env:MAIL_HOST = "smtp.example.com"
 $env:MAIL_PORT = "587"
 $env:MAIL_USERNAME = "usuario@example.com"
 $env:MAIL_PASSWORD = "tu_password_smtp"
+$env:MAIL_FROM = "remitente-verificado@example.com"
+$env:CLOUDINARY_CLOUD_NAME = "tu_cloud_name"
+$env:CLOUDINARY_API_KEY = "tu_api_key"
+$env:CLOUDINARY_API_SECRET = "tu_api_secret"
 $env:APP_BASE_URL = "http://localhost:8080"
 ```
 
@@ -93,6 +97,10 @@ $env:APP_BASE_URL = "http://localhost:8080"
 | `MAIL_PORT` | Puerto SMTP | Requerido |
 | `MAIL_USERNAME` | Usuario SMTP | Sin valor |
 | `MAIL_PASSWORD` | Contrasena SMTP | Sin valor |
+| `MAIL_FROM` | Remitente verificado usado en los correos | Requerido |
+| `CLOUDINARY_CLOUD_NAME` | Nombre del cloud de Cloudinary | Requerido |
+| `CLOUDINARY_API_KEY` | Clave publica de Cloudinary | Requerido |
+| `CLOUDINARY_API_SECRET` | Secreto de Cloudinary | Requerido |
 | `APP_BASE_URL` | URL publica del backend | URL de Render definida en la configuracion |
 | `APP_UPLOAD_DIR` | Directorio local de archivos | `uploads` |
 
@@ -146,6 +154,28 @@ docker run --rm -p 8080:8080 --env-file .env trackfile-backend
 ```
 
 El contenedor expone el puerto `8080`; suministra las variables de entorno necesarias al iniciarlo.
+
+## Despliegue en Render
+
+Configura el servicio como Docker y registra las variables de `.env.example` desde el panel **Environment**. No definas `PORT`: Render proporciona esa variable automaticamente.
+
+Para Neon, separa la cadena de conexion en tres variables. `DB_URL` debe comenzar por `jdbc:postgresql://` y no debe incluir usuario ni contrasena:
+
+```env
+DB_URL=jdbc:postgresql://ep-young-wave-ahdvmbc2.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
+DB_USER=neondb_owner
+DB_PASSWORD=your_neon_password
+```
+
+Para Brevo utiliza credenciales SMTP, no la API key HTTP:
+
+```env
+MAIL_HOST=smtp-relay.brevo.com
+MAIL_PORT=587
+MAIL_USERNAME=your_brevo_smtp_login
+MAIL_PASSWORD=your_brevo_smtp_key
+MAIL_FROM=your_verified_sender@example.com
+```
 
 ## Repositorio
 
