@@ -14,6 +14,7 @@ import com.TrackFile.app.repository.VehiculoRepository;
 import com.TrackFile.app.web.dto.response.CreateMantenimientoRequest;
 import com.TrackFile.app.web.dto.response.UpdateMantenimientoRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import java.time.temporal.ChronoUnit;
 import java.time.LocalDate;
@@ -30,6 +31,9 @@ public class MantenimientoService {
     private final UsuarioRepository usuarioRepository;
     private final CurrentUserService currentUserService;
     private final NotificacionService notificacionService;
+
+    @Value("${app.background-alerts.enabled:false}")
+    private boolean backgroundAlertsEnabled;
 
     public MantenimientoService(
             MantenimientoRepository mantenimientoRepository,
@@ -249,6 +253,9 @@ public class MantenimientoService {
 
     @Scheduled(fixedRate = 60000)
     public void generarAlertasMantenimientosProximosAutomaticas() {
+        if (!backgroundAlertsEnabled) {
+            return;
+        }
         generarAlertasMantenimientosProximos();
     }
 
