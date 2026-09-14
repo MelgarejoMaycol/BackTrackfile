@@ -9,6 +9,7 @@ import com.TrackFile.app.domain.enums.UrgenciaNotificacion;
 import com.TrackFile.app.repository.DocumentoRepository;
 import com.TrackFile.app.repository.NotificacionRepository;
 import com.TrackFile.app.web.dto.response.NotificacionResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,9 @@ public class NotificacionService {
     private final NotificacionRepository notificacionRepository;
     private final CurrentUserService currentUserService;
     private final DocumentoRepository documentoRepository;
+
+    @Value("${app.background-alerts.enabled:false}")
+    private boolean backgroundAlertsEnabled;
 
     public NotificacionService(
             NotificacionRepository notificacionRepository,
@@ -219,6 +223,9 @@ public class NotificacionService {
 
     @Scheduled(fixedRate = 60000)
     public void generarAlertasAutomaticasDiarias() {
+        if (!backgroundAlertsEnabled) {
+            return;
+        }
         generarAlertasDocumentos();
     }
 
