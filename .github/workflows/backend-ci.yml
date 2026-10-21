@@ -1,0 +1,46 @@
+name: TrackFile Backend CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: trackfile_ci
+          POSTGRES_USER: trackfile_ci
+          POSTGRES_PASSWORD: trackfile_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U trackfile_ci -d trackfile_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DB_URL: jdbc:postgresql://localhost:5432/trackfile_ci
+      DB_USER: trackfile_ci
+      DB_PASSWORD: trackfile_ci
+      JWT_SECRET: ci-only-trackfile-jwt-secret-at-least-32-characters
+      MAIL_HOST: localhost
+      MAIL_PORT: "1025"
+      MAIL_FROM: ci@example.invalid
+      BACKGROUND_ALERTS_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: Run tests
+        run: ./mvnw -B --no-transfer-progress test
+      - name: Package
+        run: ./mvnw -B --no-transfer-progress -DskipTests package
