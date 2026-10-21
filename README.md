@@ -1,5 +1,8 @@
 # Trackfile Backend
 
+[![Backend CI](https://github.com/MelgarejoMaycol/BackTrackfile/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/MelgarejoMaycol/BackTrackfile/actions/workflows/backend-ci.yml)
+
+
 API REST para la gestion documental y el mantenimiento operativo de empresas de transporte. Centraliza usuarios, empresas, vehiculos, conductores, propietarios, documentos, solicitudes, mantenimientos, notificaciones y alertas.
 
 ## Tecnologias
@@ -103,6 +106,8 @@ $env:APP_BASE_URL = "http://localhost:8080"
 | `CLOUDINARY_API_SECRET` | Secreto de Cloudinary | Requerido |
 | `APP_BASE_URL` | URL publica del backend | URL de Render definida en la configuracion |
 | `APP_UPLOAD_DIR` | Directorio local de archivos | `uploads` |
+| `JPA_DDL_AUTO` | Control de esquema en Hibernate | `update` (legado, pendiente de migraciones versionadas) |
+| `JPA_SHOW_SQL` | Impresión de SQL en logs | `false` |
 
 No agregues credenciales a `application.properties`. Para desarrollo local tambien puede usarse un archivo `application-secrets.properties` en la raiz, que ya esta excluido por `.gitignore`.
 
@@ -136,7 +141,13 @@ En Linux o macOS:
 ./mvnw test
 ```
 
-Las pruebas de contexto necesitan una configuracion de base de datos y las variables requeridas por la aplicacion.
+Las pruebas de contexto se ejecutan en GitHub Actions con PostgreSQL temporal y valores de prueba. La ejecución local también necesita una base de datos y las variables de entorno requeridas.
+
+## Seguridad y evolución del esquema
+
+La configuración actual usa `JPA_DDL_AUTO=update` por compatibilidad histórica; para una operación empresarial conviene introducir migraciones versionadas (Flyway o Liquibase) y cambiar explícitamente a `validate` una vez revisado el esquema. El cambio no se aplica automáticamente porque podría afectar una base de datos existente.
+
+Los SQL de Hibernate no se imprimen por defecto. Activa `JPA_SHOW_SQL=true` únicamente durante un diagnóstico controlado para no exponer datos en registros de producción.
 
 ## Build
 
