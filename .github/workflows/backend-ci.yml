@@ -32,6 +32,9 @@ jobs:
       MAIL_HOST: localhost
       MAIL_PORT: "1025"
       MAIL_FROM: ci@example.invalid
+      CLOUDINARY_CLOUD_NAME: ci-test
+      CLOUDINARY_API_KEY: "000000000000000"
+      CLOUDINARY_API_SECRET: ci-only-placeholder-not-a-production-credential
       BACKGROUND_ALERTS_ENABLED: "false"
     steps:
       - uses: actions/checkout@v4
