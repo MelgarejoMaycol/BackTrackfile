@@ -41,6 +41,6 @@ jobs:
           java-version: "17"
           cache: maven
       - name: Run tests
-        run: ./mvnw -B --no-transfer-progress test
+        run: bash ./mvnw -B --no-transfer-progress test
       - name: Package
-        run: ./mvnw -B --no-transfer-progress -DskipTests package
+        run: bash ./mvnw -B --no-transfer-progress -DskipTests package
