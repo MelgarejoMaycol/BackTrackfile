@@ -149,6 +149,16 @@ La configuración actual usa `JPA_DDL_AUTO=update` por compatibilidad histórica
 
 Los SQL de Hibernate no se imprimen por defecto. Activa `JPA_SHOW_SQL=true` únicamente durante un diagnóstico controlado para no exponer datos en registros de producción.
 
+## Pruebas de comportamiento verificadas
+
+El CI ejecuta Maven sobre una base PostgreSQL temporal y cubre, entre otras verificaciones:
+
+- Contexto Spring Boot y arranque de la aplicación.
+- Emisión de tokens JWT, identidad asociada, fecha de vencimiento y rechazo de tokens alterados o caducados.
+- Respuestas del chatbot documental, registro de mensajes y consulta del historial limitado al usuario autenticado.
+
+Las pruebas de JWT y chatbot son unitarias; no se presentan como prueba exhaustiva de autorización, de seguridad de documentos ni de todos los flujos CRUD. Para revisarlas, consulta `src/test/java/com/TrackFile/app/`.
+
 ## Build
 
 ```powershell
