@@ -10,6 +10,7 @@ import com.TrackFile.app.web.dto.RegistroEmpresaRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin("*")
 public class AuthController {
 
     private final EmpresaService empresaService;
@@ -90,9 +90,12 @@ public class AuthController {
 
             return ResponseEntity.ok(resp);
 
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode())
+                    .body(ex.getReason() == null ? "No se pudo iniciar sesión." : ex.getReason());
         } catch (Exception ex) {
             return ResponseEntity.status(500)
-                    .body("Error interno en login: " + ex.getMessage());
+                    .body("No fue posible iniciar sesión. Inténtalo nuevamente.");
         }
     }
 
