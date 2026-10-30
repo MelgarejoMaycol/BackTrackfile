@@ -16,10 +16,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import org.springframework.lang.NonNull;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+
+    private static final Set<String> READ_ONLY_METHODS = Set.of("GET", "HEAD", "OPTIONS");
 
     private final JwtService jwtService;
     private final UsuarioRepository usuarioRepository;
@@ -73,6 +76,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             Usuario u = usuarioRepository.findByCorreo(correo).orElse(null);
 
             if (u != null && correo.equalsIgnoreCase(u.getCorreo())) {
+
+                // La demo usa usuarios verdaderos, pero no puede alterar datos.
+                // El bloqueo se aplica en el backend, no solamente en la UI.
+                if (DemoAccounts.isDemo(u.getCorreo())
+                        && !READ_ONLY_METHODS.contains(request.getMethod())) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"message\":\"La cuenta demo es de solo lectura.\"}");
+                    return;
+                }
 
                 List<SimpleGrantedAuthority> authorities = List.of(
                         new SimpleGrantedAuthority("ROLE_" + u.getRol().name())

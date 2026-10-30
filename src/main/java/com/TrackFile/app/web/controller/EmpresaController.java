@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/empresas")
-@CrossOrigin("*")
 public class EmpresaController {
 
     private final EmpresaRepository repo;

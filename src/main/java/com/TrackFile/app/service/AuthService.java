@@ -1,6 +1,7 @@
 package com.TrackFile.app.service;
 
 import com.TrackFile.app.config.JwtService;
+import com.TrackFile.app.config.DemoAccounts;
 import com.TrackFile.app.domain.Usuario;
 import com.TrackFile.app.repository.UsuarioRepository;
 import com.TrackFile.app.web.dto.AuthResponse;
@@ -43,7 +44,8 @@ public class AuthService {
         }
 
         // 🔒 Bloquear si no confirmó correo
-        if (u.getEmailConfirmado() == null || !u.getEmailConfirmado()) {
+        if ((u.getEmailConfirmado() == null || !u.getEmailConfirmado())
+                && !DemoAccounts.isDemo(correoNormalizado)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Debes verificar tu correo antes de iniciar sesión");
         }
 
