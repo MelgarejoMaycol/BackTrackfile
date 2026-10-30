@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tipos-solicitud")
-@CrossOrigin("*")
 public class TipoSolicitudController {
 
     private final SolicitudService solicitudService;
