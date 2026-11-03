@@ -5,6 +5,13 @@
 
 API REST para la gestion documental y el mantenimiento operativo de empresas de transporte. Centraliza usuarios, empresas, vehiculos, conductores, propietarios, documentos, solicitudes, mantenimientos, notificaciones y alertas.
 
+## Contexto y atribución del proyecto
+
+Este repositorio forma parte de **TrackFile, proyecto de grado desarrollado en equipo**. La implementación principal del servidor Java/Spring Boot estuvo a cargo de una compañera del equipo; Maycol Melgarejo se enfocó en el diseño/documentación de PostgreSQL, el cliente Flutter/Dart, la integración y las pruebas. Se comparte el repositorio para revisar la arquitectura y la integración, **no para atribuir individualmente todo el backend**.
+
+- [Cliente Flutter y demo de TrackFile](https://github.com/MelgarejoMaycol/TRACKFILE)
+- [Caso de estudio profesional](https://melgarejomaycol.vercel.app/#caso-trackfile)
+
 ## Tecnologias
 
 - Java 17
@@ -200,4 +207,4 @@ MAIL_FROM=your_verified_sender@example.com
 
 ## Repositorio
 
-Repositorio personal independiente: [MelgarejoMaycol/BackTrackfile](https://github.com/MelgarejoMaycol/BackTrackfile).
+Código del backend del proyecto académico compartido: [MelgarejoMaycol/BackTrackfile](https://github.com/MelgarejoMaycol/BackTrackfile).
